@@ -1,0 +1,183 @@
+TRANSMITTER CODE:
+#include <VirtualWire.h>
+#include <VirtualWire_Config.h>
+constinttx_pin = 12;
+constintrx_pin = 12;
+intval ;
+intxco = 493;
+intyco = 485;
+intvrx = A0;
+intvry = A1;
+intxdata = 0;
+intydata = 0;
+charmsg[6];
+void setup() 
+{
+Serial.begin(9600);
+Serial.print("Setup");
+vw_set_tx_pin(tx_pin);
+vw_setup(2000);
+pinMode(vrx,INPUT);
+pinMode(vry,INPUT);
+}
+void loop() 
+{
+xdata = analogRead(vrx);
+ydata = analogRead(vry);
+Serial.print("X : ");
+Serial.println(xdata);
+Serial.print("Y : ");
+Serial.println(ydata);
+RamraoAdik Institute of Technology
+delay(100);
+if ((xdata == xco) && (ydata == yco))
+{
+Serial.print("stop");
+Serial.print ("\n");
+val = 0;
+Serial.println(val);
+Serial.println("stop");
+delay(30);
+}
+else if ((xdata> 600) && (ydata>= yco))
+{
+Serial.print("forward");
+Serial.print ("\n");
+val = 1;
+Serial.println(val);
+Serial.println("forward");
+delay(30);
+}
+else if ((xdata< 400) && (ydata>= yco))
+{
+Serial.print("backward");
+Serial.print ("\n");
+val = 2;
+Serial.println(val);
+Serial.println("backward");
+delay(30);
+}
+else if ((xdata<= xco) && (ydata> 600))
+{
+Serial.print("right");
+RamraoAdik Institute of Technology
+Serial.print ("\n");
+val = 3;
+Serial.println(val);
+Serial.println("right");
+delay(30);
+}
+else if ((xdata>= xco) && (ydata< 400))
+{
+Serial.print("left");
+Serial.print ("\n");
+val = 4;
+Serial.println(val);
+Serial.println("left");
+delay(30);
+}
+itoa(val,msg,10);
+vw_send((uint8_t*)msg, strlen(msg));
+Serial.print("msg : ");
+Serial.println(msg);
+vw_wait_tx();
+delay(40);
+}
+Receiver Code :
+#include <VirtualWire.h>
+#include <VirtualWire_Config.h>
+constinttx_pin = 12;
+constintrx_pin = 12;
+intval ;
+char value[5];
+int en1 = 5;
+int en2 = 6;
+intmotor_Lred = 8;
+intmotor_Lblack = 9;
+intmotor_Rred = 10;
+intmotor_Rblack = 11;
+RamraoAdik Institute of Technology
+void setup() 
+{
+Serial.begin(9600);
+Serial.println("Setup");
+pinMode(motor_Lred, OUTPUT);
+pinMode(motor_Lblack, OUTPUT);
+pinMode(motor_Rred, OUTPUT);
+pinMode(motor_Rblack, OUTPUT);
+pinMode(en1, OUTPUT);
+pinMode(en2, OUTPUT);
+analogWrite(en1,128);
+analogWrite(en2,128);
+vw_set_rx_pin(rx_pin);
+vw_set_ptt_inverted(true); 
+vw_setup(2000); 
+vw_rx_start(); 
+Serial.println("reciving..."); 
+}
+void loop() 
+{
+uint8_tbuf[VW_MAX_MESSAGE_LEN];
+uint8_tbuflen = VW_MAX_MESSAGE_LEN;
+if (vw_get_message(buf, &buflen))
+ {
+Serial.print("Got");
+inti;
+for(i=0; i<buflen; i++)
+ {
+value[i]=buf[i];
+Serial.println(buf[i]);
+Serial.print("");
+Serial.println(buflen);
+Serial.print("");
+ }
+val = atoi(value);
+Serial.print(val);
+if(val == 0)
+ {
+digitalWrite(motor_Lred, LOW);
+digitalWrite(motor_Lblack, LOW);
+digitalWrite(motor_Rred, LOW);
+digitalWrite(motor_Rblack, LOW);
+Serial.print("");
+Serial.print("stop");
+ }
+else if(val == 1)
+ {
+RamraoAdik Institute of Technology
+digitalWrite(motor_Lred, HIGH);
+digitalWrite(motor_Lblack, LOW);
+digitalWrite(motor_Rred, HIGH);
+digitalWrite(motor_Rblack, LOW);
+Serial.print("");
+Serial.print("forward");
+ }
+else if(val == 2)
+ {
+digitalWrite(motor_Lred, LOW);
+digitalWrite(motor_Lblack, HIGH);
+digitalWrite(motor_Rred, LOW);
+digitalWrite(motor_Rblack, HIGH);
+Serial.print("");
+Serial.print("backward");
+ }
+else if(val == 3)
+ {
+digitalWrite(motor_Lred, LOW);
+digitalWrite(motor_Lblack, HIGH);
+digitalWrite(motor_Rred, HIGH);
+digitalWrite(motor_Rblack, LOW);
+Serial.print("");
+Serial.print("right");
+ }
+else if(val == 4)
+ {
+digitalWrite(motor_Lred, HIGH);
+digitalWrite(motor_Lblack, LOW);
+digitalWrite(motor_Rred, LOW);
+digitalWrite(motor_Rblack, HIGH);
+Serial.print("");
+Serial.print("left");
+ }
+ }
+}
